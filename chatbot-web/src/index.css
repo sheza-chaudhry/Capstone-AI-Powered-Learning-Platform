@@ -66,3 +66,33 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+
+.center {
+  position: fixed; /* relative to the screen */
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chat-window {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.msg {
+  margin-bottom: 0.5rem;
+}
+.msg.user {
+  text-align: right;
+}
+.msg.assistant {
+  text-align: left;
+}
+
+.chat-input {
+  display: flex;
+  gap: 0.5rem;
+}
