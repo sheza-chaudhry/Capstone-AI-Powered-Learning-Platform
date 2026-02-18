@@ -1,6 +1,9 @@
 import ChatWindow from "./components/ChatWindow";
 import ChatInput from "./components/ChatInput";
+import Navbar from "./components/Navbar";
 import { useChat } from "./hooks/useChat";
+
+
 
 export default function App() {
   const { messages, send, loading } = useChat();
@@ -8,8 +11,9 @@ export default function App() {
   // Template in use
   return (
     <div className="app">
-      <ChatWindow  className="center" messages={messages} />
-      <ChatInput  className="center" onSend={send} disabled={loading} />
+      <Navbar/>
+      <ChatWindow  className="" messages={messages} />
+      <ChatInput  className="" onSend={send} disabled={loading} />
     </div>
   );
 }
