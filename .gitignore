@@ -27,3 +27,12 @@ htmlcov/
 
 # SQLite files
 *.sqlite3
+
+# Docker volumes (if ever stored locally)
+ollama_data/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# pytest
+.pytest_cache/
