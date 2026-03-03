@@ -1,100 +1,83 @@
-'use client'
+"use client";
 
-import { useState, useRef, useEffect } from 'react'
-import { Message } from '../lib/types'
-import MessageBubble from './MessageBubble'
-import ChatInput from './ChatInput'
+import { useState, useEffect, useRef } from "react";
+import ChatInput from "./ChatInput";
 
-export default function ChatWindow() {
-  const [messages, setMessages] = useState<Message[]>([])
-    const messagesEndRef = useRef<HTMLDivElement>(null)
+type Message = {
+  role: "user" | "bot";
+  text: string;
+  time: string;
+};
 
-  
-  const sendMessage = async (text: string) => {
-    const newMessage: Message = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content: text,
-      timestamp: new Date().toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit',
-        hour12: true 
-      })
-    }
-    
+export default function ChatWindow({
+  messages,
+  onSend,
+  isBotThinking, // new prop from parent
+}: {
+  messages: Message[];
+  onSend: (text: string) => void;
+  isBotThinking: boolean;
+}) {
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-    setMessages((prev) => [...prev, newMessage])
+  const isStartScreen = messages.length === 0;
 
-    // For now, simulate a bot response after a delay
-    setTimeout(() => {
-      const botResponse: Message = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: 'Response from Model...',
-        timestamp: new Date().toLocaleTimeString('en-US', { 
-          hour: 'numeric', 
-          minute: '2-digit',
-          hour12: true 
-        })
-      }
-      setMessages((prev) => [...prev, botResponse])
-    }, 1000)
-  }
+  // Auto-scroll to bottom whenever messages or thinking state changes
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isBotThinking]);
 
+  function handleSend(text: string) {
+    onSend(text); // simply pass the message up; parent handles thinking and bot reply
+  }
 
   return (
-    <div className="h-full flex flex-col px-20">
-      {/* Messages area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
-        {messages.map((message) => (
-          <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[70%] ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
-              <div className={`inline-block px-6 py-4 rounded-[30px] border-2 border-black ${
-                message.role === 'user' 
-                  ? 'bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]' 
-                  : 'bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]'
-              }`}>
-                <p className="text-black text-base">{message.content}</p>
-              </div>
-              <p className="text-black text-sm mt-1 px-2">{message.timestamp}</p>
-            </div>
+    <div className="flex flex-col h-full">
+      {isStartScreen ? (
+        <div className="flex flex-1 flex-col items-center justify-center text-center">
+          <h1 className="text-3xl text-black font-bold mb-4">Ask me anything! 🌟</h1>
+          <div className="w-full max-w-2xl">
+            <ChatInput onSend={handleSend} />
           </div>
-        ))}
-      </div>
-
-      {/* Input at bottom */}
-      <div className="p-6 flex items-center gap-3">
-        <button className="w-12 h-12 rounded-full border-2 border-black bg-white flex items-center justify-center text-2xl hover:bg-gray-50 transition-colors">
-          😊
-        </button>
-        <div className="flex-1 relative">
-          <form onSubmit={(e) => {
-            e.preventDefault()
-            const input = e.currentTarget.elements.namedItem('message') as HTMLInputElement
-            if (input.value.trim()) {
-              sendMessage(input.value)
-              input.value = ''
-            }
-          }}>
-            <input 
-              name="message"
-              type="text" 
-              placeholder="What questions do you have for me?"
-              className="w-full px-6 py-4 border-2 border-black rounded-full bg-white placeholder:text-black
-               text-black caret-black focus:outline-none focus:ring-2 focus:ring-blue-300 focus:placeholder:opacity-0"
-            />
-            <button 
-              type="submit"
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#6CB4E0] cursor-pointer rounded-full flex items-center justify-center border-2 border-black hover:bg-[#5BA3CF] transition-colors"
-            >
-              <span className="text-white text-xl">↑</span>
-            </button>
-          </form>
         </div>
-      </div>
+      ) : (
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={`flex ${
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div className="px-4 py-2 bg-white border1 text-black border-black rounded-2xl shadow-md max-w-[70%]">
+                  {msg.text}
+                  {/* Optional: display time in small text */}
+                  <div className="text-xs text-gray-500 mt-1">{msg.time}</div>
+                </div>
+              </div>
+            ))}
+
+            {/* Bot thinking indicator - shown when isBotThinking is true */}
+            {isBotThinking && (
+              <div className="flex items-center gap-2">
+                🤖
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 bg-black rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-black rounded-full animate-pulse [animation-delay:150ms]"></div>
+                  <div className="w-2 h-2 bg-black rounded-full animate-pulse [animation-delay:300ms]"></div>
+                </div>
+              </div>
+            )}
+
+            <div ref={bottomRef} />
+          </div>
+
+          <div className="p-4 border-t-2 ">
+            <ChatInput onSend={handleSend} />
+          </div>
+        </div>
+      )}
     </div>
-  )
+  );
 }
