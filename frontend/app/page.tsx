@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import ChatWindow from "../components/ChatWindow";
 import Link from "next/link";
+import {askQuestion} from "./api/modelApi";
+
 
 type Message = {
   role: "user" | "bot";
@@ -68,14 +70,15 @@ export default function Home() {
     // Optionally keep sidebar open after creating a new chat – we leave it as is
   }
 
-  function handleSend(userMessage: string) {
+  async function handleSend(userMessage: string) {
     if (!activeChatId) return;
-
+  
     const time = new Date().toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
-
+  
+    // Add user message
     setAllChats((prev) =>
       prev.map((chat) =>
         chat.id === activeChatId
@@ -93,16 +96,21 @@ export default function Home() {
           : chat
       )
     );
-
+  
     setIsBotThinking(true);
-
-    setTimeout(() => {
+  
+    try {
+      const response = await askQuestion({
+        question: userMessage
+      });
+  
+      const botReply = response.data.answer || "No response from model";
+  
       const botTime = new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       });
-      const botReply = `You said: "${userMessage}"`; // placeholder
-
+  
       setAllChats((prev) =>
         prev.map((chat) =>
           chat.id === activeChatId
@@ -116,9 +124,34 @@ export default function Home() {
             : chat
         )
       );
-
-      setIsBotThinking(false);
-    }, 1500);
+    } catch (error) {
+      console.error("Model error:", error);
+  
+      const botTime = new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+  
+      setAllChats((prev) =>
+        prev.map((chat) =>
+          chat.id === activeChatId
+            ? {
+                ...chat,
+                messages: [
+                  ...chat.messages,
+                  {
+                    role: "bot",
+                    text: "Something went wrong contacting the model.",
+                    time: botTime,
+                  },
+                ],
+              }
+            : chat
+        )
+      );
+    }
+  
+    setIsBotThinking(false);
   }
 
   function deleteChat(chatId: string) {
@@ -165,7 +198,7 @@ export default function Home() {
                 <div key={chat.id} className="flex items-center gap-1">
                   <button
                     onClick={() => setActiveChatId(chat.id)}
-                    className={`w-full text-left px-3 py-2 rounded-lg border-2 border-black ${
+                    className={`w-full text-black text-left px-3 py-2 rounded-lg border-2 border-black ${
                       chat.id === activeChatId ? "bg-[#A8D5E2]" : "bg-white"
                     }`}
                   >
