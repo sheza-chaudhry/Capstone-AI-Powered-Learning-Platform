@@ -68,7 +68,7 @@ export default function Home() {
     // Optionally keep sidebar open after creating a new chat – we leave it as is
   }
 
-  function handleSend(userMessage: string) {
+  async function handleSend(userMessage: string) {
     if (!activeChatId) return;
 
     const time = new Date().toLocaleTimeString([], {
@@ -90,18 +90,27 @@ export default function Home() {
                 { role: "user", text: userMessage, time },
               ],
             }
-          : chat
-      )
+          : chat,
+      ),
     );
 
     setIsBotThinking(true);
 
-    setTimeout(() => {
+    try {
+      const response = await fetch("http://localhost:8000/ask", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question: userMessage }),
+      });
+
+      const data = await response.json();
+
       const botTime = new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       });
-      const botReply = `You said: "${userMessage}"`; // placeholder
 
       setAllChats((prev) =>
         prev.map((chat) =>
@@ -110,15 +119,17 @@ export default function Home() {
                 ...chat,
                 messages: [
                   ...chat.messages,
-                  { role: "bot", text: botReply, time: botTime },
+                  { role: "bot", text: data.answer, time: botTime },
                 ],
               }
-            : chat
-        )
+            : chat,
+        ),
       );
-
+    } catch (error) {
+      console.error("Failed to reach backend:", error);
+    } finally {
       setIsBotThinking(false);
-    }, 1500);
+    }
   }
 
   function deleteChat(chatId: string) {
@@ -132,7 +143,7 @@ export default function Home() {
           title: "New Chat",
           messages: [],
         };
-        setActiveChatId(newChat.id); 
+        setActiveChatId(newChat.id);
         return [newChat];
       }
       // If the deleted chat was active, set active to the first remaining chat
@@ -142,8 +153,7 @@ export default function Home() {
 
       return filtered;
     });
- 
-}
+  }
   return (
     <main className="flex h-screen">
       {/* Main container takes full height, no outer margins/background */}
@@ -200,9 +210,11 @@ export default function Home() {
               >
                 ☰
               </button>
-              <button className="back-btn px-8 py-3 bg-[#A8D5E2] text-black font-semibold 
+              <button
+                className="back-btn px-8 py-3 bg-[#A8D5E2] text-black font-semibold 
             rounded-full border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)] 
-            hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)] cursor-pointer transition-all">
+            hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)] cursor-pointer transition-all"
+              >
                 Back to Exercise
               </button>
             </div>
