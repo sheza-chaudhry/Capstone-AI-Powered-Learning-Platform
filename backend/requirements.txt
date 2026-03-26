@@ -3,3 +3,7 @@ uvicorn
 pydantic
 ollama
 python-dotenv
+psycopg2-binary
+sqlalchemy
+python-jose[cryptography]
+bcrypt
