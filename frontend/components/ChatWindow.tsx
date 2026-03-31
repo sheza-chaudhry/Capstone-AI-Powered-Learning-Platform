@@ -67,7 +67,7 @@ export default function ChatWindow({
             <div ref={bottomRef} />
           </div>
 
-          <div className="sticky bottom-0 border-t-2 border-[var(--ink)] bg-[var(--chat-bg)] py-4">
+          <div className="sticky bottom-0 bg-[var(--chat-bg)] px-2 py-4">
             <ChatInput onSend={onSend} />
           </div>
         </div>

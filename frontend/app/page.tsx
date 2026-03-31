@@ -214,8 +214,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-bg)] p-4 md:p-6">
-      <div className="app-shell mx-auto flex min-h-[calc(100vh-2rem)] max-w-7xl overflow-hidden rounded-[28px] md:min-h-[calc(100vh-3rem)]">
+    <main className="app-shell w-full min-h-screen flex overflow-hidden">
         <aside
           className={`border-r-2 border-[var(--ink)] bg-[var(--panel)] transition-all duration-300 ${
             isSidebarOpen ? "w-[280px]" : "w-0 overflow-hidden border-r-0"
@@ -251,14 +250,13 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="space-y-3 pt-2">
-              <Link href="/settings" className="settings-link">
+            <div className="sidebar-footer-card space-y-3 pt-2">
+              <Link href="/settings" className="settings-link w-full justify-center">
                 <span className="text-2xl leading-none">⚙</span>
                 <span className="font-semibold">Settings</span>
               </Link>
 
               <div className="flex items-center gap-2 text-sm text-black/70">
-
                 <div>
                   <div className="font-semibold text-black">Current model</div>
                   <div>{selectedModel.shortName}</div>
@@ -311,7 +309,6 @@ export default function Home() {
             />
           </div>
         </section>
-      </div>
     </main>
   );
 }
