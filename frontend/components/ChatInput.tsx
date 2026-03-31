@@ -1,44 +1,36 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 
 export default function ChatInput({
   onSend,
 }: {
-  onSend: (text: string) => void
+  onSend: (text: string) => void;
 }) {
-  const [input, setInput] = useState("")
+  const [input, setInput] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim()) return
-    onSend(input)
-    setInput("")
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!input.trim()) return;
+    onSend(input.trim());
+    setInput("");
   }
 
   return (
-    <form onSubmit={handleSubmit} className="relative w-full">
-      <input
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Ask me anything about your exercise..."
-        className="w-full px-6 py-4 border-black rounded-full bg-white 
-        text-black border-black  placeholder:text-black/60 
-        focus:outline-none focus:ring-2 "
-      />
+    <form onSubmit={handleSubmit} className="mx-auto w-full max-w-5xl">
+      <div className="relative">
+        <input
+          type="text"
+          value={input}
+          onChange={(event) => setInput(event.target.value)}
+          placeholder="Ask me anything about your exercise..."
+          className="w-full rounded-full border-2 border-[var(--ink)] bg-white py-4 pl-6 pr-16 text-[15px] text-black shadow-[0_8px_20px_rgba(26,26,26,0.08)] outline-none placeholder:text-black/45 focus:border-black"
+        />
 
-      <button
-        type="submit"
-        className="absolute right-2 top-1/2 -translate-y-1/2 
-        w-10 h-10 bg-[#6CB4E0] rounded-full 
-        flex items-center justify-center 
-        border-2 border-black 
-        hover:bg-[#5BA3CF] transition-colors"
-      >
-        <span className="t
-        ext-white text-xl">↑</span>
-      </button>
+        <button type="submit" className="send-button" aria-label="Send message">
+          ↑
+        </button>
+      </div>
     </form>
-  )
+  );
 }
