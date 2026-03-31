@@ -24,8 +24,7 @@ export default function SettingsPage() {
 
   return (
     <main className="min-h-screen bg-[var(--page-bg)] p-4 md:p-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-3 text-lg font-medium text-black/35">Settings Panel</div>
+      <div className="app-shell mx-auto flex min-h-[calc(60vh-2rem)] max-w-7xl overflow-hidden rounded-[28px] md:min-h-[calc(100vh-3rem)]">
 
         <section className="settings-card overflow-hidden">
           <header className="flex flex-wrap items-center justify-between gap-4 border-b-2 border-[var(--ink)] px-6 py-6 md:px-8">
