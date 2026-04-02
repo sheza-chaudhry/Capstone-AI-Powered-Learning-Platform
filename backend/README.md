@@ -15,19 +15,34 @@ This backend service is built using:
 ```
 backend/
 ├── app/
-│   ├── main.py                # FastAPI entry point
+│   ├── main.py                    # FastAPI entry point
+│
 │   ├── api/
-│   │   └── routes.py          # Chat endpoints
+│   │   └── routes.py              # Chat endpoints
+│
 │   ├── model/
-│   │   └── inference.py       # Ollama model integration
+│   │   └── inference.py           # Ollama model integration
+│
+│   ├── retrieval/
+│   │   ├── __init__.py
+│   │   ├── embeddings.py          # embed() function
+│   │   ├── vectorstore.py         # ChromaDB setup + build_vector_store()
+│   │   └── retrieve.py            # retrieve() + build_prompt()
+│
 │   ├── auth/
-│   │   ├── routes.py          # /auth/register and /auth/login
-│   │   └── utils.py           # Password hashing and JWT tokens
+│   │   ├── routes.py              # /auth/register and /auth/login
+│   │   └── utils.py               # Password hashing + JWT tokens
+│
 │   ├── database/
-│   │   ├── connection.py      # Database connection
-│   │   └── models.py          # User, ChatSession, Message tables
+│   │   ├── connection.py          # Database connection
+│   │   └── models.py              # User, ChatSession, Message tables
+│
 │   └── core/
-│       └── config.py          # Configuration and env variables
+│       └── config.py              # Config + environment variables
+│
+├── data/
+│   └── grade6textbook.pdf         # Source document for RAG
+│
 ├── requirements.txt
 ├── Dockerfile
 ├── docker-compose.yml
