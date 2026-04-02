@@ -36,3 +36,9 @@ ollama_data/
 
 # pytest
 .pytest_cache/
+
+# Data files
+data/*.pdf
+data/*.txt
+data/*.jsonl
+data/chromadb/

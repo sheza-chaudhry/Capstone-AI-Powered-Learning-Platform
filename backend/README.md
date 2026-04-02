@@ -62,9 +62,10 @@ ready to accept requests. This is the Ollama server loading the Gemma3 model
 into memory. This applies to both Docker and local runs. Subsequent requests 
 will be significantly faster as the model stays loaded for the duration of the session.
 
-**4. Pull Gemma3 into the Ollama container in a separate terminal (first time only):**
+**4. Pull models into the Ollama container (first time only):**
 ```bash
 docker exec -it backend-ollama-1 ollama pull gemma3
+docker exec -it backend-ollama-1 ollama pull nomic-embed-text
 ```
 > If the container name differs, run `docker ps` to find the correct name.
 > The Gemma3 model is saved in a Docker volume — you will not need to re-download it on future starts.
@@ -94,6 +95,7 @@ curl -fsSL https://ollama.com/install.sh | sh
 Pull the model:
 ```bash
 ollama pull gemma3
+ollama pull nomic-embed-text
 ```
 
 ---
@@ -211,6 +213,40 @@ PostgreSQL  inference.py
 ```
 
 ---
+
+## RAG Pipeline
+
+When a textbook file is present in the `data/` folder, the backend
+automatically builds a vector store on startup and uses it to retrieve
+relevant context before answering questions. If no file is present,
+the model answers using its general knowledge only.
+```
+Student question
+      │
+      ▼
+nomic-embed-text (embedding model)
+      │
+      ▼
+ChromaDB (vector similarity search)
+      │
+      ▼
+Top 4 relevant textbook chunks
+      │
+      ▼
+Gemma3 (answer using retrieved context)
+```
+
+### Adding Textbook Data
+
+Place the textbook file in the `data/` folder before starting the server:
+```
+data/
+└── grade6textbook.pdf    ← or grade6textbook.txt
+```
+
+The vector store builds automatically on first startup and persists
+to `data/chromadb/` — it will not rebuild on subsequent restarts
+unless the collection is manually deleted.
 
 ## Sprint Status
 
