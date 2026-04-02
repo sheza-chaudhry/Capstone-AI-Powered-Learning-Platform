@@ -31,7 +31,7 @@ backend/
 ├── requirements.txt
 ├── Dockerfile
 ├── docker-compose.yml
-├── .env.example
+├── .env
 └── README.md
 ```
 
@@ -57,6 +57,10 @@ cd backend
 ```bash
 docker compose up --build
 ```
+> **Note:** On first startup, expect an additional 30 seconds before the API is 
+ready to accept requests. This is the Ollama server loading the Gemma3 model 
+into memory. This applies to both Docker and local runs. Subsequent requests 
+will be significantly faster as the model stays loaded for the duration of the session.
 
 **4. Pull Gemma3 into the Ollama container in a separate terminal (first time only):**
 ```bash
@@ -157,6 +161,10 @@ Add the `.env` file you were given to the backend folder.
 ```bash
 uvicorn app.main:app --reload
 ```
+> **Note:** On first startup, expect an additional 30 seconds before the API is 
+ready to accept requests. This is the Ollama server loading the Gemma3 model 
+into memory. This applies to both Docker and local runs. Subsequent requests 
+will be significantly faster as the model stays loaded for the duration of the session.
 
 Open Swagger UI:
 ```
@@ -172,6 +180,9 @@ http://localhost:8000/docs
 | POST | `/auth/register` | Create a new account |
 | POST | `/auth/login` | Login and receive a token |
 | POST | `/ask` | Ask the AI a question |
+| GET | `/auth/sessions` | Get all sessions for logged in user |
+| GET | `/auth/sessions/{id}/messages` | Get messages for a session |
+| DELETE | `/auth/sessions/{id}` | Delete a session and its messages |
 
 Register first, then login to receive a token. The `/ask` endpoint works without a token — login is optional.
 

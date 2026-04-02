@@ -3,6 +3,7 @@ import bcrypt
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from app.core.config import settings
+from fastapi import Request
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 8
@@ -49,3 +50,22 @@ def validate_username(username: str) -> tuple[bool, str]:
     if not username.isalnum():
         return False, "Username can only contain letters and numbers"
     return True, ""
+
+
+def get_optional_user(request: Request, db) -> str | None:
+    """
+    Reads the Authorization header if present.
+    Returns the username if token is valid, None if no token or invalid.
+    """
+    auth_header = request.headers.get("Authorization")
+    
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+    
+    token = auth_header.split(" ")[1]  # get the part after "Bearer "
+    payload = decode_access_token(token)
+    
+    if not payload:
+        return None
+        
+    return payload.get("sub")  # "sub" is where we stored the username
