@@ -4,11 +4,12 @@
 
 This backend service is built using:
 
-- **FastAPI** – API framework
-- **Uvicorn** – ASGI server
-- **Ollama** – local model serving (Gemma3)
-- **PostgreSQL** – database for users and chat history
-- **Docker & Docker Compose** – containerization
+- **FastAPI** – API framework  
+- **Uvicorn** – ASGI server  
+- **Ollama** – local model serving (Gemma3)  
+- **ChromaDB** – vector database for retrieval-augmented generation (RAG)  
+- **PostgreSQL** – database for users and chat history  
+- **Docker & Docker Compose** – containerization  
 
 ## Project Structure
 
@@ -58,7 +59,7 @@ backend/
 Docker Desktop must be installed on your machine.
 Download it at https://www.docker.com/products/docker-desktop
 
-No Python, Ollama, or PostgreSQL installation needed — everything runs in containers.
+No Python, Ollama,chromaDB or PostgreSQL installation needed — everything runs in containers.
 
 **1. Clone the repo and enter the backend folder:**
 ```bash
