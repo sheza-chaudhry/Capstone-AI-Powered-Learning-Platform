@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import ChatInput from "./ChatInput";
+import ReactMarkdown from "react-markdown";
+
 
 type Message = {
   role: "user" | "bot";
@@ -51,7 +53,8 @@ export default function ChatWindow({
                 }`}
               >
                 <div className="px-4 py-2 bg-white border1 text-black border-black rounded-2xl shadow-md max-w-[70%]">
-                  {msg.text}
+                  {/* {msg.text} */}
+                  <ReactMarkdown>{msg.text}</ReactMarkdown>
                   {/* Optional: display time in small text */}
                   <div className="text-xs text-gray-500 mt-1">{msg.time}</div>
                 </div>

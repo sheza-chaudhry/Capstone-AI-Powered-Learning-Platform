@@ -4,6 +4,11 @@ import { useState, useEffect } from "react";
 import ChatWindow from "../components/ChatWindow";
 import Link from "next/link";
 import {askQuestion} from "./api/modelApi";
+import ReactMarkdown from "react-markdown";
+import LoginModal from "../components/LoginModal";
+import LoginForm from "../components/LoginForm";
+import SignupForm from "../components/SignupForm";
+
 
 
 type Message = {
@@ -23,6 +28,9 @@ export default function Home() {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [isBotThinking, setIsBotThinking] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // 👈 new state
+  const [isOpen, setIsOpen] = useState(false);
+  const [authMode, setAuthMode] = useState("login"); // keep track of the login state
+
 
   const activeChat = allChats.find((c) => c.id === activeChatId);
 
@@ -175,8 +183,18 @@ export default function Home() {
 
       return filtered;
     });
+
  
 }
+
+    const handleClose = () => {
+      setIsOpen(false);
+      setAuthMode("login"); // 👈 reset when closing
+    };
+
+
+
+  
   return (
     <main className="flex h-screen">
       {/* Main container takes full height, no outer margins/background */}
@@ -216,7 +234,40 @@ export default function Home() {
                   </button>
                 </div>
               ))}
-            </div>
+
+                    </div>
+                    <div>
+                    
+                    <button onClick={() => setIsOpen(true)}
+                    className="mb-4 px-4 py-2 bg-[#A8D5E2] 
+                    hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)] cursor-pointer 
+                    transition-all text-black rounded-full text-center flex justify-center items-center w-full"
+                    >
+                      Login
+                    </button>
+
+                    {/* <LoginModal isOpen={isOpen} setIsOpen={setIsOpen}>
+                      <LoginForm onSuccess={() => setIsOpen(false)} />
+                      <p> No account? Sign Up</p>
+                    </LoginModal> */}
+                   <LoginModal
+                      isOpen={isOpen}
+                      setIsOpen={setIsOpen}
+                      title={authMode === "login" ? "Login" : "Sign Up"}
+                    >
+                      {authMode === "login" ? (
+                        <LoginForm switchToSignup={() => setAuthMode("signup")} />
+                      ) : (
+                        <SignupForm
+                          // onSuccess={() => setIsOpen(false)}
+                          onSuccess = {handleClose}
+                          switchToLogin={() => setAuthMode("login")}
+                        />
+                      )}
+                    </LoginModal>
+
+                    </div>
+            {/* </div> */}
           </div>
         )}
 
