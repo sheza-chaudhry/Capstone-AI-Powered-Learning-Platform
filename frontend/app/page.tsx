@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import ChatWindow from "../components/ChatWindow";
 import { DEFAULT_MODEL_ID, getModelById } from "../lib/models";
+import ReactMarkdown from "react-markdown";
+import LoginModal from "../components/LoginModal";
+import LoginForm from "../components/LoginForm";
+import SignupForm from "../components/SignupForm";
 
 type Message = {
   role: "user" | "bot";
@@ -59,6 +63,8 @@ export default function Home() {
   const [isBotThinking, setIsBotThinking] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // frontend team default
   const [selectedModelId, setSelectedModelId] = useState(DEFAULT_MODEL_ID);
+  const [isOpen, setIsOpen] = useState(false); // Open state of login window
+  const [authMode, setAuthMode] = useState("login"); // keep track of the login state
 
   const activeChat = allChats.find((chat) => chat.id === activeChatId) ?? null;
   const selectedModel = getModelById(selectedModelId);
@@ -305,6 +311,13 @@ export default function Home() {
     });
   }
 
+  const handleClose = () => {
+    setIsOpen(false);
+    setAuthMode("login"); // 👈 reset when closing
+  };
+
+
+
   return (
     <main className="app-shell w-full min-h-screen flex overflow-hidden">
       <aside
@@ -346,6 +359,32 @@ export default function Home() {
           </div>
 
           <div className="sidebar-footer-card space-y-3 pt-2">
+          
+            <button onClick={() => setIsOpen(true)}
+                     className="cursor-pointer settings-link w-full justify-center"
+            >
+               <span className="font-semibold">Login</span>
+            </button>
+
+            <LoginModal
+                      isOpen={isOpen}
+                      setIsOpen={setIsOpen}
+                      title={authMode === "login" ? "Login" : "Sign Up"}
+                    >
+                      {authMode === "login" ? (
+                        <LoginForm switchToSignup={() => setAuthMode("signup")} />
+                      ) : (
+                        <SignupForm
+                          onSuccess = {handleClose}
+                          switchToLogin={() => setAuthMode("login")}
+                        />
+                      )}
+              </LoginModal>
+
+
+          </div>
+          
+          <div className="sidebar-footer-card space-y-3 pt-2">
             <Link
               href="/settings"
               className="settings-link w-full justify-center"
@@ -361,6 +400,7 @@ export default function Home() {
               </div>
             </div>
           </div>
+
         </div>
       </aside>
 
