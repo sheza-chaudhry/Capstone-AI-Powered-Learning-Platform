@@ -370,7 +370,7 @@ export default function Home() {
 
               <LoginModal
                 isOpen={isOpen}
-                setIsOpen={setIsOpen}
+                setIsOpen={handleClose}
                 title={
                   authMode === "login" ? (
                     <span className="flex items-center gap-2">
@@ -385,14 +385,14 @@ export default function Home() {
                   )
                 }
               >
-                      {authMode === "login" ? (
-                        <LoginForm switchToSignup={() => setAuthMode("signup")} />
-                      ) : (
-                        <SignupForm
-                          onSuccess = {handleClose}
-                          switchToLogin={() => setAuthMode("login")}
-                        />
-                      )}
+                {authMode === "login" ? (
+                  <LoginForm switchToSignup={() => setAuthMode("signup")} />
+                ) : (
+                  <SignupForm
+                    onSuccess = {handleClose}
+                    switchToLogin={() => setAuthMode("login")}
+                  />
+                )}
               </LoginModal>
 
 
