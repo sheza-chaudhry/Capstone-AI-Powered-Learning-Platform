@@ -8,6 +8,7 @@ import ReactMarkdown from "react-markdown";
 import LoginModal from "../components/LoginModal";
 import LoginForm from "../components/LoginForm";
 import SignupForm from "../components/SignupForm";
+import { LogIn, UserPlus } from "lucide-react"; // Login Icon
 
 type Message = {
   role: "user" | "bot";
@@ -361,16 +362,29 @@ export default function Home() {
           <div className="sidebar-footer-card space-y-3 pt-2">
           
             <button onClick={() => setIsOpen(true)}
-                     className="cursor-pointer settings-link w-full justify-center"
+                     className="cursor-pointer settings-link w-full justify-center gap-2"
             >
+               <LogIn size={18} strokeWidth={3} />
                <span className="font-semibold">Login</span>
             </button>
 
-            <LoginModal
-                      isOpen={isOpen}
-                      setIsOpen={setIsOpen}
-                      title={authMode === "login" ? "Login" : "Sign Up"}
-                    >
+              <LoginModal
+                isOpen={isOpen}
+                setIsOpen={setIsOpen}
+                title={
+                  authMode === "login" ? (
+                    <span className="flex items-center gap-2">
+                      <LogIn size={20} strokeWidth={2.5} />
+                      Login
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <UserPlus size={20} strokeWidth={2.5} />
+                      Sign Up
+                    </span>
+                  )
+                }
+              >
                       {authMode === "login" ? (
                         <LoginForm switchToSignup={() => setAuthMode("signup")} />
                       ) : (
