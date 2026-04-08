@@ -14,7 +14,6 @@ type Message = {
   role: "user" | "bot";
   text: string;
   time: string;
-  latencyMs?: number;
 };
 
 type ChatSession = {
@@ -180,13 +179,9 @@ export default function Home() {
   }
 
   async function handleSend(userMessage: string) {
-    // Measure how long to return
-    const startTime = performance.now();
-
     if (!activeChatId) return;
 
     const userTime = getCurrentTime();
-
 
     setAllChats((prev) =>
       prev.map((chat) =>
@@ -229,9 +224,6 @@ export default function Home() {
         }),
       });
 
-      const endTime = performance.now();
-      const latency = Math.round(endTime - startTime);
-
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
       }
@@ -252,7 +244,6 @@ export default function Home() {
                       data.answer ??
                       "I'm ready once the backend is connected.",
                     time: getCurrentTime(),
-                    latencyMs: latency,
                   },
                 ],
               }
@@ -261,9 +252,6 @@ export default function Home() {
       );
     } catch (error) {
       console.error("Failed to reach backend:", error);
-      
-      const endTime = performance.now();
-      const latency = Math.round(endTime - startTime);
 
       setAllChats((prev) =>
         prev.map((chat) =>
@@ -276,7 +264,6 @@ export default function Home() {
                     role: "bot",
                     text: `Frontend preview mode: I saved your message and would answer with the ${selectedModel.name} once the backend is connected.`,
                     time: getCurrentTime(),
-                    latencyMs: latency,
                   },
                 ],
               }
