@@ -46,6 +46,13 @@ export default function ChatWindow({
                   <p className="whitespace-pre-line text-[15px] leading-7 text-black">
                     {message.text}
                   </p>
+                  {message.latencyMs && (
+                    <div className="text-xs text-black/45">
+                     <span className="font-semibold">
+                      {(message.latencyMs / 1000).toFixed(1)}s
+                    </span>{" "} response time
+                    </div>
+                  )}
                   <div className="mt-2 text-xs text-black/45">{message.time}</div>
                 </div>
               </div>
