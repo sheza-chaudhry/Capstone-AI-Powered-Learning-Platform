@@ -1,139 +1,66 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import ChatWindow from "../components/ChatWindow";
-import { DEFAULT_MODEL_ID, getModelById } from "../lib/models";
-import ReactMarkdown from "react-markdown";
-import LoginModal from "../components/LoginModal";
-import LoginForm from "../components/LoginForm";
-import SignupForm from "../components/SignupForm";
-import { LogIn, UserPlus } from "lucide-react"; // Login Icon
-
-type Message = {
-  role: "user" | "bot";
-  text: string;
-  time: string;
-};
-
-type ChatSession = {
-  id: string;
-  title: string;
-  messages: Message[];
-  sessionId: number | null; // backend session id, null for guests or new chats
-};
-
-const STORAGE_KEY = "chatSessions";
-const MODEL_STORAGE_KEY = "selectedModelId";
-
-function getCurrentTime() {
-  return new Date().toLocaleTimeString([], {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
-
-function createWelcomeMessages(modelId: string): Message[] {
-  const model = getModelById(modelId);
-  return [
-    {
-      role: "bot",
-      text: `Hi there! I'm your tutor today.\nLet's learn something cool!\nWhat are you hoping to work on?`,
-      time: getCurrentTime(),
-    },
-    {
-      role: "bot",
-      text: `You're currently previewing the ${model.name}. You can change models anytime from Settings.`,
-      time: getCurrentTime(),
-    },
-  ];
-}
-
-function createChat(modelId: string): ChatSession {
-  return {
-    id: crypto.randomUUID(),
-    title: "New Chat",
-    messages: createWelcomeMessages(modelId),
-    sessionId: null, // new chats have no backend session yet
-  };
-}
+import { useEffect, useRef, useState } from "react";
+import { DEFAULT_MODEL_ID, MODEL_STORAGE_KEY, getModelById } from "../lib/models";
+import {
+  ForgotPasswordPage,
+  LandingPage,
+  LoginPage,
+  SignupPage,
+} from "../components/home/AuthViews";
+import { ChatShell } from "../components/home/ChatShell";
+import {
+  GUEST_PREVIEW_STORAGE_KEY,
+  TOKEN_STORAGE_KEY,
+  USERNAME_STORAGE_KEY,
+  createChat,
+  getCurrentTime,
+  getStoredProfile,
+  saveStoredProfile,
+} from "../components/home/home-utils";
+import {
+  AuthScreen,
+  ChatSession,
+  LoginResult,
+  Message,
+  SignupPayload,
+} from "../components/home/types";
+import landingImage from "./OLE_Nepal_front_PAGE.png";
 
 export default function Home() {
   const [allChats, setAllChats] = useState<ChatSession[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [isBotThinking, setIsBotThinking] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // frontend team default
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedModelId, setSelectedModelId] = useState(DEFAULT_MODEL_ID);
-  const [isOpen, setIsOpen] = useState(false); // Open state of login window
-  const [authMode, setAuthMode] = useState("login"); // keep track of the login state
+  const [authChecked, setAuthChecked] = useState(false);
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [currentUsername, setCurrentUsername] = useState<string | null>(null);
+  const [authScreen, setAuthScreen] = useState<AuthScreen>("landing");
+  const [authNotice, setAuthNotice] = useState<string | null>(null);
+  const [isGuestPreview, setIsGuestPreview] = useState(false);
+  const selectedModelIdRef = useRef(selectedModelId);
 
   const activeChat = allChats.find((chat) => chat.id === activeChatId) ?? null;
   const selectedModel = getModelById(selectedModelId);
+  const studentProfile = getStoredProfile(currentUsername);
 
-  // Initialize: load model, then check auth and load sessions
+  useEffect(() => {
+    selectedModelIdRef.current = selectedModelId;
+  }, [selectedModelId]);
+
   useEffect(() => {
     const savedModel =
       window.localStorage.getItem(MODEL_STORAGE_KEY) ?? DEFAULT_MODEL_ID;
     setSelectedModelId(savedModel);
-
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      // logged in — load past sessions from backend
-      fetch("http://localhost:8000/auth/sessions", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((sessions) => {
-          const loadedChats: ChatSession[] = sessions.map((s: any) => ({
-            id: crypto.randomUUID(),
-            title: s.title,
-            messages: [],
-            sessionId: s.session_id,
-          }));
-
-          const newChat = createChat(savedModel);
-          setAllChats([newChat, ...loadedChats]);
-          setActiveChatId(newChat.id);
-        })
-        .catch(() => {
-          // if fetch fails fall back to a fresh chat
-          const newChat = createChat(savedModel);
-          setAllChats([newChat]);
-          setActiveChatId(newChat.id);
-        });
-    } else {
-      // guest — check sessionStorage first, otherwise start fresh
-      const savedChats = window.sessionStorage.getItem(STORAGE_KEY);
-      if (savedChats) {
-        try {
-          const parsed = JSON.parse(savedChats) as ChatSession[];
-          if (parsed.length > 0) {
-            setAllChats(parsed);
-            setActiveChatId(parsed[0].id);
-            return;
-          }
-        } catch (error) {
-          console.error("Failed to parse saved chats", error);
-        }
-      }
-
-      const firstChat = createChat(savedModel);
-      setAllChats([firstChat]);
-      setActiveChatId(firstChat.id);
-    }
+    setAuthToken(window.localStorage.getItem(TOKEN_STORAGE_KEY));
+    setCurrentUsername(window.localStorage.getItem(USERNAME_STORAGE_KEY));
+    setIsGuestPreview(
+      window.localStorage.getItem(GUEST_PREVIEW_STORAGE_KEY) === "true",
+    );
+    setAuthChecked(true);
   }, []);
 
-  // Persist chats to sessionStorage (guests only — logged in users use the db)
-  useEffect(() => {
-    if (allChats.length > 0) {
-      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(allChats));
-    }
-  }, [allChats]);
-
-  // Sync model selection across tabs
   useEffect(() => {
     const syncModelSelection = () => {
       const modelId =
@@ -145,31 +72,100 @@ export default function Home() {
     return () => window.removeEventListener("storage", syncModelSelection);
   }, []);
 
+  useEffect(() => {
+    if (!authChecked || !authToken || isGuestPreview) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadSessions() {
+      try {
+        const response = await fetch("http://localhost:8000/auth/sessions", {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed with status ${response.status}`);
+        }
+
+        const sessions = (await response.json()) as Array<{
+          session_id: number;
+          title: string;
+        }>;
+
+        if (cancelled) {
+          return;
+        }
+
+        const loadedChats: ChatSession[] = sessions.map((session) => ({
+          id: crypto.randomUUID(),
+          title: session.title,
+          messages: [],
+          sessionId: session.session_id,
+        }));
+
+        const newChat = createChat(selectedModelIdRef.current);
+        setAllChats([newChat, ...loadedChats]);
+        setActiveChatId(newChat.id);
+      } catch (error) {
+        console.error("Failed to load sessions", error);
+
+        if (cancelled) {
+          return;
+        }
+
+        window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+        window.localStorage.removeItem(USERNAME_STORAGE_KEY);
+        setAuthToken(null);
+        setCurrentUsername(null);
+        setAuthScreen("login");
+        setAuthNotice("Your session expired. Please log in again.");
+      }
+    }
+
+    void loadSessions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authChecked, authToken, isGuestPreview]);
+
   function createNewChat() {
     const newChat = createChat(selectedModelId);
-    setAllChats((prev) => [newChat, ...prev]);
+    setAllChats((previous) => [newChat, ...previous]);
     setActiveChatId(newChat.id);
   }
 
-  // Load messages from backend when a student clicks a past session
   async function handleSelectChat(chat: ChatSession) {
     setActiveChatId(chat.id);
 
-    // only fetch if it's a saved session with no messages loaded yet
-    if (chat.sessionId && chat.messages.length === 0) {
-      const token = localStorage.getItem("token");
+    if (chat.sessionId && chat.messages.length === 0 && authToken) {
       try {
-        const res = await fetch(
+        const response = await fetch(
           `http://localhost:8000/auth/sessions/${chat.sessionId}/messages`,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
           },
         );
-        const data = await res.json();
 
-        setAllChats((prev) =>
-          prev.map((c) =>
-            c.id === chat.id ? { ...c, messages: data.messages } : c,
+        if (!response.ok) {
+          throw new Error(`Failed with status ${response.status}`);
+        }
+
+        const data = (await response.json()) as {
+          messages: Message[];
+        };
+
+        setAllChats((previous) =>
+          previous.map((currentChat) =>
+            currentChat.id === chat.id
+              ? { ...currentChat, messages: data.messages }
+              : currentChat,
           ),
         );
       } catch (error) {
@@ -179,12 +175,14 @@ export default function Home() {
   }
 
   async function handleSend(userMessage: string) {
-    if (!activeChatId) return;
+    if (!activeChatId) {
+      return;
+    }
 
     const userTime = getCurrentTime();
 
-    setAllChats((prev) =>
-      prev.map((chat) =>
+    setAllChats((previous) =>
+      previous.map((chat) =>
         chat.id === activeChatId
           ? {
               ...chat,
@@ -204,14 +202,12 @@ export default function Home() {
     setIsBotThinking(true);
 
     try {
-      // build headers — add token only if logged in
       const headers: HeadersInit = {
         "Content-Type": "application/json",
       };
 
-      const token = localStorage.getItem("token");
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
+      if (authToken) {
+        headers.Authorization = `Bearer ${authToken}`;
       }
 
       const response = await fetch("http://localhost:8000/ask", {
@@ -228,10 +224,13 @@ export default function Home() {
         throw new Error(`Request failed with status ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as {
+        answer?: string;
+        session_id?: number;
+      };
 
-      setAllChats((prev) =>
-        prev.map((chat) =>
+      setAllChats((previous) =>
+        previous.map((chat) =>
           chat.id === activeChatId
             ? {
                 ...chat,
@@ -242,7 +241,7 @@ export default function Home() {
                     role: "bot",
                     text:
                       data.answer ??
-                      "I'm ready once the backend is connected.",
+                      "I am ready to help once the backend answer is available.",
                     time: getCurrentTime(),
                   },
                 ],
@@ -253,8 +252,8 @@ export default function Home() {
     } catch (error) {
       console.error("Failed to reach backend:", error);
 
-      setAllChats((prev) =>
-        prev.map((chat) =>
+      setAllChats((previous) =>
+        previous.map((chat) =>
           chat.id === activeChatId
             ? {
                 ...chat,
@@ -262,7 +261,7 @@ export default function Home() {
                   ...chat.messages,
                   {
                     role: "bot",
-                    text: `Frontend preview mode: I saved your message and would answer with the ${selectedModel.name} once the backend is connected.`,
+                    text: `I saved your question and would answer with the ${selectedModel.name} once the backend is connected again.`,
                     time: getCurrentTime(),
                   },
                 ],
@@ -276,27 +275,23 @@ export default function Home() {
   }
 
   async function deleteChat(chatId: string) {
-    const chat = allChats.find((c) => c.id === chatId);
+    const chat = allChats.find((currentChat) => currentChat.id === chatId);
 
-    // if it's a saved session, delete from backend too
-    if (chat?.sessionId) {
-      const token = localStorage.getItem("token");
+    if (chat?.sessionId && authToken) {
       try {
-        await fetch(
-          `http://localhost:8000/auth/sessions/${chat.sessionId}`,
-          {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
+        await fetch(`http://localhost:8000/auth/sessions/${chat.sessionId}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
           },
-        );
+        });
       } catch (error) {
         console.error("Failed to delete session from backend:", error);
       }
     }
 
-    // remove from frontend state
-    setAllChats((prev) => {
-      const filtered = prev.filter((c) => c.id !== chatId);
+    setAllChats((previous) => {
+      const filtered = previous.filter((currentChat) => currentChat.id !== chatId);
 
       if (filtered.length === 0) {
         const replacementChat = createChat(selectedModelId);
@@ -312,157 +307,216 @@ export default function Home() {
     });
   }
 
-  const handleClose = () => {
-    setIsOpen(false);
-    setAuthMode("login"); // 👈 reset when closing
-  };
+  async function handleLogin(
+    username: string,
+    password: string,
+  ): Promise<LoginResult> {
+    if (!username || !password) {
+      return {
+        ok: false,
+        error: "Please enter your username and password.",
+      };
+    }
 
+    try {
+      const response = await fetch("http://localhost:8000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
 
+      const data = (await response.json()) as {
+        access_token?: string;
+        username?: string;
+        detail?: string;
+      };
+
+      if (!response.ok || !data.access_token) {
+        return {
+          ok: false,
+          error: data.detail ?? "Invalid username or password.",
+        };
+      }
+
+      window.localStorage.setItem(TOKEN_STORAGE_KEY, data.access_token);
+      window.localStorage.setItem(USERNAME_STORAGE_KEY, data.username ?? username);
+      setAuthToken(data.access_token);
+      setCurrentUsername(data.username ?? username);
+      setAuthNotice(null);
+      return { ok: true };
+    } catch (error) {
+      console.error("Login error:", error);
+      return {
+        ok: false,
+        error: "Unable to reach the server right now. Please try again.",
+      };
+    }
+  }
+
+  async function handleSignup(payload: SignupPayload): Promise<LoginResult> {
+    if (!payload.name || !payload.username || !payload.password || !payload.grade) {
+      return {
+        ok: false,
+        error: "Please complete every required field before creating the account.",
+      };
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: payload.username,
+          password: payload.password,
+        }),
+      });
+
+      const data = (await response.json()) as {
+        detail?: string;
+      };
+
+      if (!response.ok) {
+        return {
+          ok: false,
+          error: data.detail ?? "Unable to create the account.",
+        };
+      }
+
+      saveStoredProfile(payload.username, {
+        name: payload.name,
+        grade: payload.grade,
+      });
+      setAuthScreen("login");
+      setAuthNotice(
+        `Account created for ${payload.name}. Log in with the username "${payload.username}".`,
+      );
+      return { ok: true };
+    } catch (error) {
+      console.error("Signup error:", error);
+      return {
+        ok: false,
+        error: "Unable to reach the server right now. Please try again.",
+      };
+    }
+  }
+
+  function handleLogout() {
+    window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+    window.localStorage.removeItem(USERNAME_STORAGE_KEY);
+    window.localStorage.removeItem(GUEST_PREVIEW_STORAGE_KEY);
+    setAuthToken(null);
+    setCurrentUsername(null);
+    setIsGuestPreview(false);
+    setAllChats([]);
+    setActiveChatId(null);
+    setIsSidebarOpen(true);
+    setAuthScreen("landing");
+    setAuthNotice(null);
+  }
+
+  function handleGuestPreview() {
+    const previewChat = createChat(selectedModelId);
+    window.localStorage.setItem(GUEST_PREVIEW_STORAGE_KEY, "true");
+    setIsGuestPreview(true);
+    setCurrentUsername("Guest Preview");
+    setAllChats([previewChat]);
+    setActiveChatId(previewChat.id);
+    setAuthNotice(null);
+  }
+
+  function handleReturnToLanding() {
+    setAuthNotice(null);
+    setAuthScreen("landing");
+  }
+
+  if (!authChecked) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--page-bg)] text-lg font-semibold text-[var(--ink)]">
+        Loading Tutor Bot...
+      </div>
+    );
+  }
+
+  if (!authToken && !isGuestPreview) {
+    if (authScreen === "login") {
+      return (
+        <LoginPage
+          landingImageSrc={landingImage.src}
+          notice={authNotice}
+          onSubmit={handleLogin}
+          onHome={handleReturnToLanding}
+          onSignup={() => {
+            setAuthNotice(null);
+            setAuthScreen("signup");
+          }}
+          onForgotPassword={() => {
+            setAuthNotice(null);
+            setAuthScreen("forgot");
+          }}
+        />
+      );
+    }
+
+    if (authScreen === "signup") {
+      return (
+        <SignupPage
+          landingImageSrc={landingImage.src}
+          onSubmit={handleSignup}
+          onHome={handleReturnToLanding}
+          onLogin={() => {
+            setAuthNotice(null);
+            setAuthScreen("login");
+          }}
+        />
+      );
+    }
+
+    if (authScreen === "forgot") {
+      return (
+        <ForgotPasswordPage
+          landingImageSrc={landingImage.src}
+          onHome={handleReturnToLanding}
+          onSignup={() => setAuthScreen("signup")}
+          onBackToLogin={() => setAuthScreen("login")}
+        />
+      );
+    }
+
+    return (
+      <LandingPage
+        landingImageSrc={landingImage.src}
+        onLogin={() => setAuthScreen("login")}
+        onSignup={() => setAuthScreen("signup")}
+        onGuest={handleGuestPreview}
+      />
+    );
+  }
 
   return (
-    <main className="app-shell w-full min-h-screen flex overflow-hidden">
-      <aside
-        className={`border-r-2 border-[var(--ink)] bg-[var(--panel)] transition-all duration-300 ${
-          isSidebarOpen ? "w-[280px]" : "w-0 overflow-hidden border-r-0"
-        }`}
-      >
-        <div className="flex h-full flex-col gap-4 p-4">
-          <button
-            onClick={createNewChat}
-            className="pill-button w-full cursor-pointer"
-          >
-            + New Chat
-          </button>
-
-          <div className="flex-1 space-y-3 overflow-y-auto pr-1">
-            {allChats.map((chat) => (
-              <div key={chat.id} className="flex items-center gap-2">
-                <button
-                  onClick={() => handleSelectChat(chat)}
-                  className={`chat-session-button ${
-                    chat.id === activeChatId
-                      ? "bg-[var(--accent)]"
-                      : "bg-[var(--accent-soft)]"
-                  }`}
-                >
-                  <span className="truncate">{chat.title}</span>
-                </button>
-
-                <button
-                  onClick={() => deleteChat(chat.id)}
-                  className="delete-chat-button"
-                  aria-label={`Delete ${chat.title}`}
-                >
-                  🗑
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <div className="sidebar-footer-card space-y-3 pt-2">
-          
-            <button onClick={() => setIsOpen(true)}
-                     className="cursor-pointer settings-link w-full justify-center gap-2"
-            >
-               <LogIn size={18} strokeWidth={3} />
-               <span className="font-semibold">Login</span>
-            </button>
-
-              <LoginModal
-                isOpen={isOpen}
-                setIsOpen={handleClose}
-                title={
-                  authMode === "login" ? (
-                    <span className="flex items-center gap-2">
-                      <LogIn size={20} strokeWidth={2.5} />
-                      Login
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      <UserPlus size={20} strokeWidth={2.5} />
-                      Sign Up
-                    </span>
-                  )
-                }
-              >
-                {authMode === "login" ? (
-                  <LoginForm switchToSignup={() => setAuthMode("signup")} />
-                ) : (
-                  <SignupForm
-                    onSuccess = {handleClose}
-                    switchToLogin={() => setAuthMode("login")}
-                  />
-                )}
-              </LoginModal>
-
-
-          </div>
-          
-          <div className="sidebar-footer-card space-y-3 pt-2">
-            <Link
-              href="/settings"
-              className="settings-link w-full justify-center"
-            >
-              <span className="text-2xl leading-none">⚙</span>
-              <span className="font-semibold">Settings</span>
-            </Link>
-
-            <div className="flex items-center gap-2 text-sm text-black/70">
-              <div>
-                <div className="font-semibold text-black">Current model</div>
-                <div>{selectedModel.shortName}</div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </aside>
-
-      <section className="flex flex-1 flex-col bg-[var(--chat-bg)]">
-        <header className="flex flex-wrap items-center justify-between gap-4 border-b-2 border-[var(--ink)] px-4 py-4 md:px-6">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsSidebarOpen((prev) => !prev)}
-              className="circle-icon-button"
-              aria-label="Toggle sidebar"
-            >
-              ☰
-            </button>
-
-            <button className="pill-button px-6 cursor-pointer">
-              Back to Exercise
-            </button>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link href="/faqs" className="pill-button px-6 cursor-pointer">
-              FAQs
-            </Link>
-
-            <div className="flex items-center gap-2 rounded-full border-2 border-[var(--ink)] bg-white px-3 py-2 shadow-[0_4px_12px_rgba(26,26,26,0.08)]">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[var(--ink)] bg-[var(--accent)]">
-                🤖
-              </div>
-              <div>
-                <div className="text-sm font-semibold leading-tight">
-                  Tutor Bot
-                </div>
-                <div className="text-xs text-black/60">
-                  {selectedModel.shortName}
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <div className="min-h-0 flex-1 px-4 py-5 md:px-6 md:py-6">
-          <ChatWindow
-            messages={activeChat?.messages ?? []}
-            onSend={handleSend}
-            isBotThinking={isBotThinking}
-          />
-        </div>
-      </section>
-    </main>
+    <ChatShell
+      landingImageSrc={landingImage.src}
+      allChats={allChats}
+      activeChatId={activeChatId}
+      currentUsername={currentUsername}
+      studentProfile={studentProfile}
+      isGuestPreview={isGuestPreview}
+      isSidebarOpen={isSidebarOpen}
+      selectedModelShortName={selectedModel.shortName}
+      messages={activeChat?.messages ?? []}
+      isBotThinking={isBotThinking}
+      onCreateNewChat={createNewChat}
+      onSelectChat={handleSelectChat}
+      onDeleteChat={deleteChat}
+      onToggleSidebar={() => setIsSidebarOpen((previous) => !previous)}
+      onLogout={handleLogout}
+      onSend={handleSend}
+    />
   );
 }

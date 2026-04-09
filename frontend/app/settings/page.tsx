@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import landingImage from "../OLE_Nepal_front_PAGE.png";
 import {
   AVAILABLE_MODELS,
   DEFAULT_MODEL_ID,
@@ -9,6 +10,7 @@ import {
 } from "../../lib/models";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [selectedModelId, setSelectedModelId] = useState(() => {
     if (typeof window === "undefined") {
       return DEFAULT_MODEL_ID;
@@ -23,11 +25,19 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-bg)] p-4 md:p-8">
-      <div className="app-shell mx-auto flex min-h-[calc(60vh-2rem)] max-w-7xl overflow-hidden rounded-[28px] md:min-h-[calc(100vh-3rem)]">
+    <main
+      className="relative min-h-screen overflow-hidden px-3 py-3 md:px-4 md:py-4"
+      style={{
+        backgroundImage: `linear-gradient(135deg, rgba(16, 55, 71, 0.9), rgba(12, 36, 48, 0.62)), url(${landingImage.src})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,247,223,0.24),transparent_30%)]" />
 
-        <section className="settings-card overflow-hidden">
-          <header className="flex flex-wrap items-center justify-between gap-4 border-b-2 border-[var(--ink)] px-6 py-6 md:px-8">
+      <div className="app-shell relative z-10 mx-auto flex min-h-[calc(100vh-1.5rem)] max-w-7xl overflow-hidden rounded-[30px] border-white/20 bg-[#fff8ec]/86 shadow-[0_28px_80px_rgba(0,0,0,0.22)] backdrop-blur-sm">
+        <section className="w-full overflow-hidden">
+          <header className="flex flex-wrap items-center justify-between gap-4 border-b-2 border-[rgba(23,56,69,0.14)] bg-[#103747]/88 px-6 py-6 text-white md:px-8">
             <div className="flex items-center gap-4">
               <div className="text-5xl leading-none">⚙</div>
               <h1 className="text-4xl font-black tracking-tight md:text-5xl">
@@ -35,19 +45,24 @@ export default function SettingsPage() {
               </h1>
             </div>
 
-            <Link href="/" className="close-button px-8 py-4 text-2xl font-bold">
-              <span className="text-4xl leading-none">×</span>
-              <span className="text-xl">Close</span>
-            </Link>
+            <button
+              type="button"
+              onClick={() => router.push("/")}
+              className="inline-flex items-center gap-3 rounded-full border border-white/24 bg-white/12 px-7 py-3 text-white shadow-[0_8px_18px_rgba(0,0,0,0.16)] transition hover:bg-white/18"
+            >
+              <span className="text-3xl leading-none font-bold">×</span>
+              <span className="text-xl font-bold leading-none">Close</span>
+            </button>
           </header>
 
-          <div className="space-y-8 px-6 py-10 md:px-8">
+          <div className="relative space-y-8 bg-[linear-gradient(180deg,rgba(255,248,236,0.8)_0%,rgba(253,244,227,0.88)_100%)] px-6 py-10 md:px-8">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(241,200,78,0.18),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(29,107,99,0.16),transparent_24%)]" />
             <div className="flex flex-col gap-4 md:flex-row md:items-start">
-              <div className="w-full max-w-[180px] pt-3 text-2xl font-bold">
+              <div className="relative z-10 w-full max-w-[180px] pt-3 text-2xl font-bold text-[#173845]">
                 Model Choice:
               </div>
 
-              <div className="flex-1 space-y-4">
+              <div className="relative z-10 flex-1 space-y-4">
                 {AVAILABLE_MODELS.map((model) => {
                   const isActive = model.id === selectedModelId;
 
@@ -56,9 +71,7 @@ export default function SettingsPage() {
                       key={model.id}
                       type="button"
                       onClick={() => handleModelChange(model.id)}
-                      className={`model-option ${
-                        isActive ? "model-option-active" : ""
-                      }`}
+                      className={`model-option ${isActive ? "model-option-active" : ""}`}
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-3">

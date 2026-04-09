@@ -21,7 +21,7 @@ export default function LoginModal({ isOpen, setIsOpen, title, children }) {
                 className="close-button px-8 py-4 text-2xl font-bold"
             >
                 <span className="text-xl leading-none">×</span>
-                <span className="text-sm">Close</span>
+                <span className="text-sm cursor-pointer">Close</span>
             </button>
          </div>
 

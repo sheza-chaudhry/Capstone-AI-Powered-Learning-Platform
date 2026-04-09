@@ -25,10 +25,10 @@ export default function ChatWindow({
   }, [messages, isBotThinking]);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full min-h-0 flex-col">
       <div className="flex-1 overflow-y-auto px-1">
-        <div className="mx-auto flex h-full max-w-5xl flex-col">
-          <div className="flex-1 space-y-5 pb-8">
+        <div className="mx-auto flex min-h-full max-w-5xl flex-col">
+          <div className="chat-thread-panel flex-1 space-y-5 pb-8">
             {messages.map((message, index) => (
               <div
                 key={`${message.role}-${message.time}-${index}`}
@@ -67,7 +67,7 @@ export default function ChatWindow({
             <div ref={bottomRef} />
           </div>
 
-          <div className="sticky bottom-0 bg-[var(--chat-bg)] px-2 py-4">
+          <div className="sticky bottom-0 px-2 py-4">
             <ChatInput onSend={onSend} />
           </div>
         </div>

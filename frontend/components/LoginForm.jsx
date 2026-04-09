@@ -1,6 +1,4 @@
 import { useState } from "react";
-import Link from "next/link";
-
 
 export default function LoginForm({ switchToSignup }) {
     const [username, setUsername] = useState("");
@@ -71,14 +69,14 @@ export default function LoginForm({ switchToSignup }) {
             onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button className="w-full bg-blue-600 text-white py-2 rounded"
+        <button className="w-full bg-blue-600 text-white py-2 rounded cursor-pointer transition hover:bg-blue-700"
                 onClick = {handleSubmit}
         >
             Sign In
         </button>
 
         <p className="text-sm text-center">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <button type="button" onClick={switchToSignup} className="text-blue-600 underline">
             Sign up
             </button>

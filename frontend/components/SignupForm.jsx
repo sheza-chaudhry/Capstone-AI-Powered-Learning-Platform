@@ -91,7 +91,7 @@ export default function SignupForm({ onSuccess, switchToLogin }) {
         <button
           type="button"
           onClick={switchToLogin}
-          className="text-blue-600 underline"
+          className="text-blue-600 underline cursor-pointer"
         >
           Log in
         </button>
