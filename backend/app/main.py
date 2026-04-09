@@ -9,6 +9,7 @@ from app.api.routes import router as chat_router
 from app.auth.routes import router as auth_router
 from app.database.connection import Base, engine
 from app.core.config import settings
+from app.core.models import AVAILABLE_MODELS
 from app.retrieval import (
     build_vector_store,
     collection_exists,
@@ -58,28 +59,29 @@ async def lifespan(app: FastAPI):
     else:
         print("Vector store already built — skipping rebuild")
 
-    # warm up Ollama
-    print("Warming up Ollama model...")
-    try:
-        client = ollama.Client(host=settings.OLLAMA_HOST)
-        client.chat(
-            model="gemma3",
-            messages=[{"role": "user", "content": "hi"}]
-        )
-        print("Model ready")
-    except Exception as e:
-        print(f"Ollama warmup failed: {e}")
+    # warm up all available models
+    client = ollama.Client(host=settings.OLLAMA_HOST)
+    for model in AVAILABLE_MODELS:
+        print(f"Warming up {model}...")
+        try:
+            client.chat(
+                model=model,
+                messages=[{"role": "user", "content": "hi"}]
+            )
+            print(f"  {model} ready")
+        except Exception as e:
+            print(f"  {model} warmup failed (not pulled?): {e}")
 
     yield
 
-    # shutdown — unload model from memory
-    print("Unloading Ollama model...")
-    try:
-        client = ollama.Client(host=settings.OLLAMA_HOST)
-        client.generate(model="gemma3", keep_alive=0)
-        print("Model unloaded")
-    except Exception as e:
-        print(f"Ollama shutdown failed: {e}")
+    # unload all models from memory on shutdown
+    for model in AVAILABLE_MODELS:
+        print(f"Unloading {model}...")
+        try:
+            client.generate(model=model, keep_alive=0)
+            print(f"  {model} unloaded")
+        except Exception as e:
+            print(f"  {model} unload failed: {e}")
 
 
 Base.metadata.create_all(bind=engine)

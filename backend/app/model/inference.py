@@ -8,11 +8,11 @@ from app.retrieval import (
     build_prompt,
 )
 from app.retrieval.retrieve import SYSTEM_PROMPT
+from app.core.models import DEFAULT_MODEL          
 
 RECENT_HISTORY = 5
 
-
-def get_response(question: str, history: list = []) -> str:
+def get_response(question: str, history: list = [], model: str = DEFAULT_MODEL) -> str:
     """
     If the vector store has been built, uses RAG to retrieve
     relevant textbook chunks before answering.
@@ -35,7 +35,7 @@ def get_response(question: str, history: list = []) -> str:
         messages.append({"role": "user", "content": prompt})
 
         response = client.chat(
-            model="gemma3",
+            model=model,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 *messages,
@@ -45,8 +45,11 @@ def get_response(question: str, history: list = []) -> str:
         # fallback — no textbook loaded yet, plain model response
         messages.append({"role": "user", "content": question})
         response = client.chat(
-            model="gemma3",
-            messages=messages
+            model=model,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                *messages,
+            ]
         )
 
     return response["message"]["content"]

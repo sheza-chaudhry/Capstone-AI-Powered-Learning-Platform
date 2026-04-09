@@ -17,8 +17,8 @@ class ChatMessage(BaseModel):
 class QuestionRequest(BaseModel):
     question: str
     history: List[ChatMessage] = []
-    session_id: int | None = None  # frontend passes this if continuing a session
-
+    session_id: int | None = None
+    model_id: str = "gemma3"          
 
 @router.post("/ask")
 def ask_question(
@@ -27,7 +27,7 @@ def ask_question(
     db: Session = Depends(get_db)
 ):
     # get answer from model regardless of auth
-    answer = get_response(body.question, body.history)
+    answer = get_response(body.question, body.history, model=body.model_id)
     
     # try to identify user from token
     username = get_optional_user(request, db)

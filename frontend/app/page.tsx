@@ -217,6 +217,7 @@ export default function Home() {
           question: userMessage,
           history: activeChat?.messages || [],
           session_id: activeChat?.sessionId || null,
+          model_id: selectedModelId,
         }),
       });
 

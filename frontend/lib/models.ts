@@ -1,5 +1,5 @@
 export const MODEL_STORAGE_KEY = "selectedModelId";
-export const DEFAULT_MODEL_ID = "gemma-4b";
+export const DEFAULT_MODEL_ID = "gemma3";
 
 export type TutorModel = {
   id: string;
@@ -11,28 +11,32 @@ export type TutorModel = {
 
 export const AVAILABLE_MODELS: TutorModel[] = [
   {
-    id: "gemma-4b",
-    name: "Gemma 4B Helper",
-    shortName: "Gemma 4B",
-    description:
-      "A balanced choice for everyday schoolwork, short explanations, and calm study support.",
-    badge: "Best overall",
+    id: "gemma3",
+    name: "Gemma 3",
+    shortName: "Gemma 3",
+    description: "A balanced choice for everyday schoolwork, short explanations, and calm study support.",
+    badge: "Default",
   },
   {
-    id: "llama-8b",
-    name: "Llama 8B Thinker",
-    shortName: "Llama 8B",
-    description:
-      "Better for step-by-step reasoning, worked examples, and deeper practice questions.",
+    id: "qwen:1.8b",
+    name: "Qwen 1.8B",
+    shortName: "Qwen 1.8B",
+    description: "A very lightweight model — great for quick lookups and simple questions on slower hardware.",
+    badge: "Lightest",
+  },
+  {
+    id: "llama3.2:3b",
+    name: "Llama 3.2 3B",
+    shortName: "Llama 3.2",
+    description: "Better for step-by-step reasoning, worked examples, and deeper practice questions.",
     badge: "Detailed help",
   },
   {
-    id: "mistral-7b",
-    name: "Mistral 7B Quick Help",
-    shortName: "Mistral 7B",
-    description:
-      "Good for fast answers, quick checks, and short revision sessions before class or homework.",
-    badge: "Fast replies",
+    id: "deepseek-r1:7b",
+    name: "DeepSeek R1 7B",
+    shortName: "DeepSeek R1",
+    description: "A strong reasoning model — well suited for tricky maths problems and multi-step explanations.",
+    badge: "Best reasoning",
   },
 ];
 

@@ -73,8 +73,8 @@ cd backend
 ```bash
 docker compose up --build
 ```
-> **Note:** On first startup, expect an additional 30 seconds before the API is 
-ready to accept requests. This is the Ollama server loading the Gemma3 model 
+> **Note:** On first startup, expect an additional 30 seconds - 1 minute before the API is 
+ready to accept requests. This is the Ollama server loading the models 
 into memory. This applies to both Docker and local runs. Subsequent requests 
 will be significantly faster as the model stays loaded for the duration of the session.
 
@@ -82,9 +82,12 @@ will be significantly faster as the model stays loaded for the duration of the s
 ```bash
 docker exec -it backend-ollama-1 ollama pull gemma3
 docker exec -it backend-ollama-1 ollama pull nomic-embed-text
+docker exec -it backend-ollama-1 ollama pull qwen:1.8b
+docker exec -it backend-ollama-1 ollama pull llama3.2:3b
+docker exec -it backend-ollama-1 ollama pull deepseek-r1:7b
 ```
 > If the container name differs, run `docker ps` to find the correct name.
-> The Gemma3 model is saved in a Docker volume — you will not need to re-download it on future starts.
+> The models are saved in a Docker volume — you will not need to re-download them on future starts.
 
 **5. Open Swagger UI:**
 ```
