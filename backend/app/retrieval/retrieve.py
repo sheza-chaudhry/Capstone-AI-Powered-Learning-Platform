@@ -18,6 +18,17 @@ Rules:
 - Do not be overly verbose.
 """
 
+SYSTEM_PROMPT_NO_TEXTBOOK = """
+You are a helpful Grade 6 math tutor.
+
+Rules:
+- Explain the solution clearly and in simple language for a Grade 6 student.
+- Show steps when solving math problems.
+- If helpful, end with one short check-for-understanding question.
+- Do not be overly verbose.
+- Present ALL math in latex format.
+"""
+
 
 def retrieve(question: str, collection: chromadb.Collection) -> list[str]:
     """

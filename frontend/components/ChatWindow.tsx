@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import ChatInput from "./ChatInput";
+import MathRenderer from "./MathRenderer";
+
 
 type Message = {
   role: "user" | "bot";
@@ -43,9 +45,19 @@ export default function ChatWindow({
                       : "message-bubble-bot"
                   }`}
                 >
-                  <p className="whitespace-pre-line text-[15px] leading-7 text-black">
-                    {message.text}
-                  </p>
+    
+                  {/* <div className="whitespace-pre-line text-[15px] leading-7 text-black">
+                    <MathRenderer content={message.text} />
+                  </div> */}
+                  {message.role === "bot" ? (
+                    <div className="text-[15px] leading-7 text-black">
+                      <MathRenderer content={message.text} />
+                    </div>
+                  ) : (
+                    <p className=" text-[15px] leading-7 text-black">
+                      {message.text}
+                    </p>
+                  )}
                   {message.latencyMs && (
                     <div className="text-xs text-black/45">
                      <span className="font-semibold">

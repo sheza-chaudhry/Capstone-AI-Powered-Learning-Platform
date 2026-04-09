@@ -8,6 +8,8 @@ from app.retrieval import (
     build_prompt,
 )
 from app.retrieval.retrieve import SYSTEM_PROMPT
+from app.retrieval.retrieve import SYSTEM_PROMPT_NO_TEXTBOOK
+
 
 RECENT_HISTORY = 5
 
@@ -46,7 +48,10 @@ def get_response(question: str, history: list = []) -> str:
         messages.append({"role": "user", "content": question})
         response = client.chat(
             model="gemma3",
-            messages=messages
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT_NO_TEXTBOOK},
+                *messages,
+            ]
         )
 
     return response["message"]["content"]
