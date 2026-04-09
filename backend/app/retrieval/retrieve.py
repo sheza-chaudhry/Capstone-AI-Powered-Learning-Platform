@@ -68,6 +68,7 @@ FORMAT
 --------------------------------
 - Keep responses structured and easy to read.
 - Use steps, bullet points, or spacing when helpful.
+- Format math using latex formatting.
 - Avoid long dense paragraphs.
 
 --------------------------------

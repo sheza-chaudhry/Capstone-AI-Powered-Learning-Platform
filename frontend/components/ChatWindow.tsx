@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import ChatInput from "./ChatInput";
+import MathRenderer from "./MathRenderer";
+
 
 type Message = {
   role: "user" | "bot";
@@ -43,9 +45,16 @@ export default function ChatWindow({
                       : "message-bubble-bot"
                   }`}
                 >
-                  <p className="whitespace-pre-line text-[15px] leading-7 text-black">
-                    {message.text}
-                  </p>
+                  {message.role === "bot" ? ( // Displaying message
+                    <div className="text-[18px] leading-7 text-black">
+                      <MathRenderer content={message.text} />
+                    </div>
+                  ) : (
+                    <p className=" text-[18px] leading-7 text-black">
+                      {message.text}
+                    </p>
+                  )}
+
                   <div className="mt-2 text-xs text-black/45">{message.time}</div>
                 </div>
               </div>
