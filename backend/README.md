@@ -115,6 +115,9 @@ Pull the model:
 ```bash
 ollama pull gemma3
 ollama pull nomic-embed-text
+ollama pull qwen:1.8b
+ollama pull llama3.2:3b
+ollama pull deepseek-r1:7b
 ```
 
 ---
@@ -182,8 +185,8 @@ Add the `.env` file you were given to the backend folder.
 ```bash
 uvicorn app.main:app --reload
 ```
-> **Note:** On first startup, expect an additional 30 seconds before the API is 
-ready to accept requests. This is the Ollama server loading the Gemma3 model 
+> **Note:** On first startup, expect an additional 30 seconds - 1 minute before the API is 
+ready to accept requests. This is the Ollama server loading the models 
 into memory. This applies to both Docker and local runs. Subsequent requests 
 will be significantly faster as the model stays loaded for the duration of the session.
 
