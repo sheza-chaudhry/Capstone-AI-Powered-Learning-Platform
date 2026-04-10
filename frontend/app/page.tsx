@@ -10,6 +10,8 @@ import {
 } from "../components/home/AuthViews";
 import { ChatShell } from "../components/home/ChatShell";
 import {
+  GUEST_ACTIVE_CHAT_STORAGE_KEY,
+  GUEST_CHAT_STORAGE_KEY,
   GUEST_PREVIEW_STORAGE_KEY,
   TOKEN_STORAGE_KEY,
   USERNAME_STORAGE_KEY,
@@ -71,6 +73,64 @@ export default function Home() {
     window.addEventListener("storage", syncModelSelection);
     return () => window.removeEventListener("storage", syncModelSelection);
   }, []);
+
+  useEffect(() => {
+    if (!authChecked || authToken || !isGuestPreview) {
+      return;
+    }
+
+    const savedChats = window.sessionStorage.getItem(GUEST_CHAT_STORAGE_KEY);
+    const savedActiveChatId = window.sessionStorage.getItem(
+      GUEST_ACTIVE_CHAT_STORAGE_KEY,
+    );
+
+    if (savedChats) {
+      try {
+        const parsedChats = JSON.parse(savedChats) as ChatSession[];
+
+        if (parsedChats.length > 0) {
+          setAllChats(parsedChats);
+          setActiveChatId(
+            savedActiveChatId &&
+              parsedChats.some((chat) => chat.id === savedActiveChatId)
+              ? savedActiveChatId
+              : parsedChats[0].id,
+          );
+          return;
+        }
+      } catch (error) {
+        console.error("Failed to restore guest preview chats", error);
+      }
+    }
+
+    const previewChat = createChat(selectedModelIdRef.current);
+    setAllChats([previewChat]);
+    setActiveChatId(previewChat.id);
+  }, [authChecked, authToken, isGuestPreview]);
+
+  useEffect(() => {
+    if (!isGuestPreview) {
+      window.sessionStorage.removeItem(GUEST_CHAT_STORAGE_KEY);
+      window.sessionStorage.removeItem(GUEST_ACTIVE_CHAT_STORAGE_KEY);
+      return;
+    }
+
+    if (allChats.length === 0) {
+      return;
+    }
+
+    window.sessionStorage.setItem(
+      GUEST_CHAT_STORAGE_KEY,
+      JSON.stringify(allChats),
+    );
+
+    if (activeChatId) {
+      window.sessionStorage.setItem(
+        GUEST_ACTIVE_CHAT_STORAGE_KEY,
+        activeChatId,
+      );
+    }
+  }, [allChats, activeChatId, isGuestPreview]);
 
   useEffect(() => {
     if (!authChecked || !authToken || isGuestPreview) {
@@ -412,6 +472,8 @@ export default function Home() {
     window.localStorage.removeItem(TOKEN_STORAGE_KEY);
     window.localStorage.removeItem(USERNAME_STORAGE_KEY);
     window.localStorage.removeItem(GUEST_PREVIEW_STORAGE_KEY);
+    window.sessionStorage.removeItem(GUEST_CHAT_STORAGE_KEY);
+    window.sessionStorage.removeItem(GUEST_ACTIVE_CHAT_STORAGE_KEY);
     setAuthToken(null);
     setCurrentUsername(null);
     setIsGuestPreview(false);
@@ -425,6 +487,11 @@ export default function Home() {
   function handleGuestPreview() {
     const previewChat = createChat(selectedModelId);
     window.localStorage.setItem(GUEST_PREVIEW_STORAGE_KEY, "true");
+    window.sessionStorage.setItem(
+      GUEST_CHAT_STORAGE_KEY,
+      JSON.stringify([previewChat]),
+    );
+    window.sessionStorage.setItem(GUEST_ACTIVE_CHAT_STORAGE_KEY, previewChat.id);
     setIsGuestPreview(true);
     setCurrentUsername("Guest Preview");
     setAllChats([previewChat]);

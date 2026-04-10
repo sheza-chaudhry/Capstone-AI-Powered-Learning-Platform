@@ -5,6 +5,8 @@ export const TOKEN_STORAGE_KEY = "token";
 export const USERNAME_STORAGE_KEY = "currentUsername";
 export const PROFILE_STORAGE_KEY = "studentProfiles";
 export const GUEST_PREVIEW_STORAGE_KEY = "guestPreviewMode";
+export const GUEST_CHAT_STORAGE_KEY = "guestPreviewChats";
+export const GUEST_ACTIVE_CHAT_STORAGE_KEY = "guestPreviewActiveChatId";
 
 export function getCurrentTime() {
   return new Date().toLocaleTimeString([], {
