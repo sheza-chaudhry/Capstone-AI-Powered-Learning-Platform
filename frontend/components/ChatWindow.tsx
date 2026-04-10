@@ -9,6 +9,7 @@ type Message = {
   role: "user" | "bot";
   text: string;
   time: string;
+  latencyMs?: number;
 };
 
 export default function ChatWindow({
@@ -45,15 +46,26 @@ export default function ChatWindow({
                       : "message-bubble-bot"
                   }`}
                 >
-                  {message.role === "bot" ? ( // Displaying message
+                  {message.role === "bot" ? (
+                  <>
                     <div className="text-[18px] leading-7 text-black">
                       <MathRenderer content={message.text} />
                     </div>
-                  ) : (
-                    <p className=" text-[18px] leading-7 text-black">
-                      {message.text}
-                    </p>
-                  )}
+
+                    {message.latencyMs !== undefined && (
+                      <div className="text-xs text-black/45">
+                        <span className="font-semibold">
+                          {(message.latencyMs / 1000).toFixed(1)}s
+                        </span>{" "}
+                        response time
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-[18px] leading-7 text-black">
+                    {message.text}
+                  </p>
+                )}
 
                   <div className="mt-2 text-xs text-black/45">{message.time}</div>
                 </div>

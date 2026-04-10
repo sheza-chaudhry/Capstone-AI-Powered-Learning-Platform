@@ -240,6 +240,8 @@ export default function Home() {
     }
 
     const userTime = getCurrentTime();
+    // Measure how long to return
+    const startTime = performance.now();
 
     setAllChats((previous) =>
       previous.map((chat) =>
@@ -281,6 +283,10 @@ export default function Home() {
         }),
       });
 
+      const endTime = performance.now();
+      const latency = Math.round(endTime - startTime);
+
+
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
       }
@@ -304,6 +310,7 @@ export default function Home() {
                       data.answer ??
                       "I am ready to help once the backend answer is available.",
                     time: getCurrentTime(),
+                    latencyMs: latency,
                   },
                 ],
               }
@@ -312,6 +319,9 @@ export default function Home() {
       );
     } catch (error) {
       console.error("Failed to reach backend:", error);
+
+      const endTime = performance.now();
+      const latency = Math.round(endTime - startTime);
 
       setAllChats((previous) =>
         previous.map((chat) =>
@@ -324,6 +334,7 @@ export default function Home() {
                     role: "bot",
                     text: `I saved your question and would answer with the ${selectedModel.name} once the backend is connected again.`,
                     time: getCurrentTime(),
+                    latencyMs:latency,
                   },
                 ],
               }
