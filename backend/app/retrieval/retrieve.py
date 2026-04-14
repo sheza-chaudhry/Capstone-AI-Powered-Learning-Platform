@@ -2,7 +2,7 @@
 import chromadb
 from app.retrieval.embeddings import embed
 
-TOP_K = 4
+TOP_K = 2 
 
 SYSTEM_PROMPT = """
 You are a skilled, patient, and clear math tutor for students (roughly Grades 1–12) in Nepal.

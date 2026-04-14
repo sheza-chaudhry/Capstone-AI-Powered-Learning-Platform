@@ -1,5 +1,4 @@
 services:
-
   api:
     build: .
     ports:
@@ -12,14 +11,14 @@ services:
     depends_on:
       - ollama
       - postgres
-
+    volumes:
+      - ./data:/app/data
   ollama:
     image: ollama/ollama
     ports:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
-
   postgres:
     image: postgres:16
     environment:
@@ -30,8 +29,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./data:/app/data
-
 volumes:
   ollama_data:
   postgres_data:
