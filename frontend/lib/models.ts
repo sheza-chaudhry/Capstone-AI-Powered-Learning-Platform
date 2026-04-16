@@ -1,5 +1,5 @@
 export const MODEL_STORAGE_KEY = "selectedModelId";
-export const DEFAULT_MODEL_ID = "gemma3";
+export const DEFAULT_MODEL_ID = "gemma3:4b-it-qat";
 
 export type TutorModel = {
   id: string;
@@ -11,33 +11,40 @@ export type TutorModel = {
 
 export const AVAILABLE_MODELS: TutorModel[] = [
   {
+    id: "gemma3:4b-it-qat",
+    name: "gemma3:4b-it-qat",
+    shortName: "gemma3:4b-it-qat",
+    description: "Gemma3 4b quantized",
+    badge: "",
+  },
+  {
     id: "gemma3",
-    name: "Gemma 3",
-    shortName: "Gemma 3",
-    description: "A balanced choice for everyday schoolwork, short explanations, and calm study support.",
-    badge: "Default",
+    name: "gemma3",
+    shortName: "gemma3",
+    description: "Gemma3 4b",
+    badge: "",
   },
   {
-    id: "qwen:1.8b",
-    name: "Qwen 1.8B",
-    shortName: "Qwen 1.8B",
-    description: "A very lightweight model — great for quick lookups and simple questions on slower hardware.",
-    badge: "Lightest",
+    id: "gemma3:1b",
+    name: "gemma3:1b",
+    shortName: "gemma3:1b",
+    description: "Gemma3 1b",
+    badge: "",
   },
   {
-    id: "llama3.2:3b",
-    name: "Llama 3.2 3B",
-    shortName: "Llama 3.2",
-    description: "Better for step-by-step reasoning, worked examples, and deeper practice questions.",
-    badge: "Detailed help",
+    id: "gemma3:1b-it-qat",
+    name: "gemma3:1b-it-qat",
+    shortName: "gemma3:1b-it-qat",
+    description: "Gemma3 1b quantized",
+    badge: "",
   },
   {
-    id: "deepseek-r1:7b",
-    name: "DeepSeek R1 7B",
-    shortName: "DeepSeek R1",
-    description: "A strong reasoning model — well suited for tricky maths problems and multi-step explanations.",
-    badge: "Best reasoning",
-  },
+    id: "qwen3-1.7-custom",
+    name: "qwen3-1.7-custom",
+    shortName: "qwen3-1.7-custom",
+    description: "Qwen 1.7b quantized",
+    badge: "",
+  }
 ];
 
 export function getModelById(id: string) {

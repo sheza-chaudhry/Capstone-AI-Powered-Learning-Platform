@@ -33,23 +33,35 @@ def get_response(question: str, history: list = [], model: str = DEFAULT_MODEL) 
         chunks = retrieve(question, collection)
         prompt = build_prompt(question, chunks)
         messages.append({"role": "user", "content": prompt})
+        # messages.append({"role": "system", "content":SYSTEM_PROMPT})
+        # messages = messages[-4:] # Limiting messages for faster inference
 
         response = client.chat(
             model=model,
             messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content":SYSTEM_PROMPT},
                 *messages,
             ]
         )
+
+        print("=== PROMPT SENT TO MODEL(Using Collection) ===")
+        for m in messages:
+            print(f"{m['role'].upper()}: {m['content']}\n")
+
     else:
         # fallback — no textbook loaded yet, plain model response
         messages.append({"role": "user", "content": question})
+        # messages = messages[-4:] # Limiting messages for faster inference
         response = client.chat(
             model=model,
             messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content":SYSTEM_PROMPT},
                 *messages,
             ]
         )
+
+        print("=== PROMPT SENT TO MODEL(Not Using Collection) ===")
+        for m in messages:
+            print(f"{m['role'].upper()}: {m['content']}\n")
 
     return response["message"]["content"]

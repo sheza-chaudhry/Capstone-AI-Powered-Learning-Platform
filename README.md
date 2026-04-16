@@ -122,11 +122,26 @@ docker exec -it backend-ollama-1 ollama pull nomic-embed-text
 docker exec -it backend-ollama-1 ollama pull qwen:1.8b
 docker exec -it backend-ollama-1 ollama pull llama3.2:3b
 docker exec -it backend-ollama-1 ollama pull deepseek-r1:7b
+docker exec -it backend-ollama-1 ollama pull gemma3:4b-it-qat
 ```
 > If the container name differs, run `docker ps` to find the correct name.
 > The models are saved in a Docker volume — you will not need to re-download them on future starts.
+**5. Build the custom qwen3 model - using a modelfile for custom configuration:**
+1. Pull the regular qwen 1.7b model.
+```bash
+docker exec -it backend-ollama-1 ollama pull qwen3:1.7b 
+```
+2. Copy the modelfile - named qwenModelfile - which specifies the system prompt and model context, into the backend container's root folder.
 
-**5. Open Swagger UI:**
+```bash
+docker cp qwenModelfile backend-ollama-1:/root/qwenModelfile 
+```
+3. Build the custom model
+
+```bash
+docker exec -it backend-ollama-1 ollama create qwen3-1.7-custom -f /root/qwenModelfile
+```
+**6. Open Swagger UI:**
 ```
 http://localhost:8000/docs
 ```
