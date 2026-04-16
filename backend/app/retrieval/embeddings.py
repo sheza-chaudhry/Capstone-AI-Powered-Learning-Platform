@@ -4,7 +4,7 @@ from app.core.config import settings
 
 def embed(text: str) -> list[float]:
     """
-    Converts a string of text into a vector using the nomic-embed-text model.
+    Converts a string of text into a vector using the snowflake-arctic-embed:22m model.
     This vector is a list of numbers that represents the meaning of the text
     in a way that similar texts will have similar vectors.
     """
@@ -14,7 +14,7 @@ def embed(text: str) -> list[float]:
     client = ollama.Client(host=settings.OLLAMA_HOST)
 
     response = client.embed(
-        model="nomic-embed-text",
+        model="snowflake-arctic-embed:22m", # Faster embedding model
         input=text.strip()
     )
 
