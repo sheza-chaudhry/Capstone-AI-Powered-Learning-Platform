@@ -26,6 +26,9 @@ def ask_question(
     body: QuestionRequest,
     db: Session = Depends(get_db)
 ):
+    
+    # Get data from the json
+    # Basedon the data use a different function
     # get answer from model regardless of auth
     answer = get_response(body.question, body.history, model=body.model_id)
     

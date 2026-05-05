@@ -44,6 +44,13 @@ export const AVAILABLE_MODELS: TutorModel[] = [
     shortName: "qwen3-1.7-custom",
     description: "Qwen 1.7b quantized",
     badge: "",
+  },
+  {
+    id: "qwen2-math:1.5b-custom",
+    name: "qwen2-math:1.5b-custom",
+    shortName: "qwen2-math:1.5b-custom",
+    description: "qwen2-math:1.5b-custom",
+    badge: "",
   }
 ];
 

@@ -27,41 +27,43 @@ def get_response(question: str, history: list = [], model: str = DEFAULT_MODEL) 
         role = "assistant" if msg.role == "bot" else "user"
         messages.append({"role": role, "content": msg.text})
 
-    if collection_exists():
-        # RAG path — retrieve context and build prompt
-        collection = get_collection()
-        chunks = retrieve(question, collection)
-        prompt = build_prompt(question, chunks)
-        messages.append({"role": "user", "content": prompt})
-        # messages.append({"role": "system", "content":SYSTEM_PROMPT})
-        # messages = messages[-4:] # Limiting messages for faster inference
+    # if collection_exists():
+    #     # RAG path — retrieve context and build prompt
+    #     collection = get_collection()
+    #     chunks = retrieve(question, collection)
+    #     prompt = build_prompt(question, chunks)
+    #     messages.append({"role": "user", "content": prompt})
+    #     # messages.append({"role": "system", "content":SYSTEM_PROMPT})
+    #     # messages = messages[-4:] # Limiting messages for faster inference
 
-        response = client.chat(
-            model=model,
-            messages=[
-                {"role": "system", "content":SYSTEM_PROMPT},
-                *messages,
-            ]
-        )
+    #     response = client.chat(
+    #         model=model,
+    #         messages=[
+    #             {"role": "system", "content":SYSTEM_PROMPT},
+    #             *messages,
+    #         ]
+    #     )
 
-        print("=== PROMPT SENT TO MODEL(Using Collection) ===")
-        for m in messages:
-            print(f"{m['role'].upper()}: {m['content']}\n")
+    #     print("=== PROMPT SENT TO MODEL(Using Collection) ===")
+    #     for m in messages:
+    #         print(f"{m['role'].upper()}: {m['content']}\n")
+    #     print("Model Response:")
+    #     print(response)
 
-    else:
-        # fallback — no textbook loaded yet, plain model response
-        messages.append({"role": "user", "content": question})
-        # messages = messages[-4:] # Limiting messages for faster inference
-        response = client.chat(
-            model=model,
-            messages=[
-                {"role": "system", "content":SYSTEM_PROMPT},
-                *messages,
-            ]
-        )
+    # else: Turning off RAG for time veing
+    # fallback — no textbook loaded yet, plain model response
+    messages.append({"role": "user", "content": question})
+    # messages = messages[-4:] # Limiting messages for faster inference
+    response = client.chat(
+        model=model,
+        messages=[
+            {"role": "system", "content":SYSTEM_PROMPT},
+            *messages,
+        ]
+    )
 
-        print("=== PROMPT SENT TO MODEL(Not Using Collection) ===")
-        for m in messages:
-            print(f"{m['role'].upper()}: {m['content']}\n")
+    print("=== PROMPT SENT TO MODEL(Not Using Collection) ===")
+    for m in messages:
+        print(f"{m['role'].upper()}: {m['content']}\n")
 
     return response["message"]["content"]
